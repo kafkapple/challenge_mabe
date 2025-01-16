@@ -3,13 +3,10 @@
 https://www.aicrowd.com/challenges/multi-agent-behavior-challenge-2022/problems/mabe-2022-mouse-triplets/leaderboards
 
 
-
+- Dataset
 %aicrowd ds dl -c {aicrowd_challenge_name} -o data # Download all files
 %aicrowd ds dl -c {aicrowd_challenge_name} -o data *submission_data* # download only the submission keypoint data
 %aicrowd ds dl -c {aicrowd_challenge_name} -o data *user_train* # download data with the public task labels provided
-
-MABe 2022 Mouse Triplets Video Data (Not implemented yet)
-https://www.aicrowd.com/challenges/multi-agent-behavior-challenge-2022/problems/mabe-2022-mouse-triplets-video-data/leaderboards
 
 ## 주요 클래스 및 함수
 
@@ -45,11 +42,9 @@ https://www.aicrowd.com/challenges/multi-agent-behavior-challenge-2022/problems/
 3. 임베딩 방법 선택:
    - PCA: 정확한 차원 축소
    - Random Projection: 빠른 처리 속도
-
-## License
-
-MIT License
-
-## Contact
-
-프로젝트 관련 문의: [이메일 주소]
+## Others
+### New baseline code
+https://github.com/AndrewUlmer/MABe_2022_TVAE
+### Other dataset
+MABe 2022 Mouse Triplets Video Data (Not implemented yet)
+https://www.aicrowd.com/challenges/multi-agent-behavior-challenge-2022/problems/mabe-2022-mouse-triplets-video-data/leaderboards
