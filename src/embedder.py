@@ -2,29 +2,23 @@ from dataclasses import dataclass
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.random_projection import GaussianRandomProjection
 from typing import Dict, List, Tuple
 
-@dataclass 
-class PCAEmbedder:
-    """PCA 기반 프레임 임베딩 클래스"""
-    
-    def __init__(self, embed_size: int):
-        self.embed_size = embed_size
-        self.scalers: List[StandardScaler] = []
-        self.pca_models: List[PCA] = []
-        
-    def fit(self, train_data: np.ndarray) -> None:
-        """각 마우스 중심 데이터에 대해 PCA 학습"""
-        for m in range(3):
-            scaler = StandardScaler(with_std=False)
-            pca = PCA(n_components=self.embed_size)
-            
-            scaler.fit(train_data[:,:,m])
-            pca.fit(train_data[:,:,m])
-            
-            self.scalers.append(scaler)
-            self.pca_models.append(pca)
-            
+def get_embedder(method: str, embed_size: int):
+    """임베더 팩토리 함수"""
+    if method == "pca":
+        return PCAEmbedder(embed_size)
+    elif method == "random_projection":
+        return RandomProjectionEmbedder(embed_size)
+    else:
+        raise ValueError(f"Unknown embedding method: {method}")
+
+@dataclass
+class BaseEmbedder:
+    """기본 임베더 클래스"""
+    embed_size: int
+
     def transform(self, keypoints: np.ndarray) -> np.ndarray:
         """키포인트를 임베딩으로 변환"""
         embeddings = np.empty((len(keypoints), self.embed_size*3), dtype=np.float32)
@@ -37,10 +31,51 @@ class PCAEmbedder:
             keypoints_centered = keypoints - ctr
             keypoints_centered = keypoints_centered.reshape(keypoints_centered.shape[0], -1)
             
-            # Transform
-            x = self.scalers[center_mouse].transform(keypoints_centered)
+            # Transform (구현은 하위 클래스에서)
+            x = self._transform_single(keypoints_centered, center_mouse)
             start_idx = center_mouse * self.embed_size
             end_idx = (center_mouse + 1) * self.embed_size
-            embeddings[:,start_idx:end_idx] = self.pca_models[center_mouse].transform(x)
+            embeddings[:,start_idx:end_idx] = x
             
-        return embeddings 
+        return embeddings
+
+@dataclass 
+class PCAEmbedder(BaseEmbedder):
+    """PCA 기반 프레임 임베딩 클래스"""
+    
+    def __init__(self, embed_size: int):
+        super().__init__(embed_size)
+        self.scalers: List[StandardScaler] = []
+        self.pca_models: List[PCA] = []
+        
+    def fit(self, train_data: np.ndarray) -> None:
+        for m in range(3):
+            scaler = StandardScaler(with_std=False)
+            pca = PCA(n_components=self.embed_size)
+            
+            scaler.fit(train_data[:,:,m])
+            pca.fit(train_data[:,:,m])
+            
+            self.scalers.append(scaler)
+            self.pca_models.append(pca)
+            
+    def _transform_single(self, data: np.ndarray, idx: int) -> np.ndarray:
+        x = self.scalers[idx].transform(data)
+        return self.pca_models[idx].transform(x)
+
+@dataclass 
+class RandomProjectionEmbedder(BaseEmbedder):
+    """랜덤 프로젝션 기반 프레임 임베딩 클래스"""
+    
+    def __init__(self, embed_size: int):
+        super().__init__(embed_size)
+        self.projectors = []
+        
+    def fit(self, train_data: np.ndarray) -> None:
+        for m in range(3):
+            projector = GaussianRandomProjection(n_components=self.embed_size)
+            projector.fit(train_data[:,:,m])
+            self.projectors.append(projector)
+            
+    def _transform_single(self, data: np.ndarray, idx: int) -> np.ndarray:
+        return self.projectors[idx].transform(data) 

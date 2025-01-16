@@ -3,4 +3,7 @@ numpy
 matplotlib
 scikit-learn
 tqdm
-pillow 
+pillow
+joblib
+pytorch-lightning
+wandb

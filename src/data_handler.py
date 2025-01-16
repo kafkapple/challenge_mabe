@@ -5,13 +5,23 @@ import os
 from embedder import PCAEmbedder
 from omegaconf import DictConfig
 from tqdm import tqdm
+from pathlib import Path
 
 @dataclass
 class MouseTrackingData:
     """마우스 트래킹 데이터를 처리하는 클래스"""
-    dataset_dir: str
-    submission_dir: str
+    dataset_dir: Path
+    submission_dir: Path
     challenge_name: str
+
+    def __init__(self, dataset_dir: str, submission_dir: str, challenge_name: str):
+        self.dataset_dir = Path(dataset_dir)
+        self.submission_dir = Path(submission_dir)
+        self.challenge_name = challenge_name
+        
+        # 디렉토리 생성
+        self.dataset_dir.mkdir(parents=True, exist_ok=True)
+        self.submission_dir.mkdir(parents=True, exist_ok=True)
 
     def download_data(self) -> None:
         """AIcrowd에서 데이터 다운로드"""
@@ -81,7 +91,7 @@ class MouseTrackingData:
         for sequence_key in tqdm(submission_clips['sequences'], desc="Processing submissions"):
             keypoints = MouseTrackingData.fill_holes(submission_clips['sequences'][sequence_key]["keypoints"])
             if keypoints.size == 0:
-                print(f"Using original keypoints for sequence {sequence_key}")
+                #print(f"Using original keypoints for sequence {sequence_key}")
                 keypoints = submission_clips['sequences'][sequence_key]["keypoints"]
             
             embeddings = embedder.transform(keypoints)
@@ -89,12 +99,18 @@ class MouseTrackingData:
             embeddings_array[start:end] = embeddings
             frame_number_map[sequence_key] = (start, end)
             start = end
-            if start % 1000 == 0:
-                print(f"Embedded {start}/{num_total_frames} frames")
+            # if start % 1000 == 0:
+            #     print(f"Embedded {start}/{num_total_frames} frames")
 
         submission_dict = {"frame_number_map": frame_number_map, "embeddings": embeddings_array}
-        os.makedirs(cfg.data.paths.submission_dir, exist_ok=True)
-        submission_path = cfg.data.path.submission_dir / "submission.npy"
-        np.save(submission_path, submission_dict)
+        
+        # Path 객체 사용 및 경로 수정
+        submission_dir = Path(cfg.data.paths.submission_dir)
+        submission_dir.mkdir(parents=True, exist_ok=True)
+        submission_path = submission_dir / "submission.npy"
+        
+        np.save(str(submission_path), submission_dict)
         print(f"\nSubmission saved to: {submission_path}")
+        
+        return submission_dict
     

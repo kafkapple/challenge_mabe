@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple
 import matplotlib
 from omegaconf import DictConfig
 import os
+from pathlib import Path
 matplotlib.use('Agg')  # Set backend to Agg
 
 @dataclass
@@ -97,9 +98,9 @@ class MouseVisualizer:
             
         ani = animation.FuncAnimation(fig, animate, frames=len(image_list), blit=True)
 
-        os.makedirs(cfg.data.paths.visualizations_dir, exist_ok=True)
-        # Save animation
-        animation_path = cfg.data.paths.visualizations_dir / f"{video_name}_animation.gif"
+        vis_dir = Path(cfg.data.paths.visualizations_dir)
+        vis_dir.mkdir(parents=True, exist_ok=True)
+        animation_path = vis_dir / f"{video_name}_animation.gif"
         ani.save(animation_path, writer='pillow')
         print(f"\nAnimation saved to: {animation_path}")
         

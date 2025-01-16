@@ -1,19 +1,39 @@
 defaults:
   - _self_
 
-seed: 42
-embed_size: 20
-frame_width: 850
-frame_height: 850
+general:
+  seed: 42
+  timestamp: ${now:%Y%m%d_%H%M%S}
+
+wandb:
+  project: "challenge-mabe"
+  entity: "ailab_upstage_fastcampus"
+  name: ${general.timestamp}
+
+params:
+  embed_size: 2
+  frame_width: 850
+  frame_height: 850
+  embedding:
+    method: "pca" # pca or random_projection
+    sampling_ratio: 0.2
+    n_jobs: -1
+  evaluation:
+    train_ratio: 0.8
+    metrics:
+      - "f1_score"
+      - "mse"
+    verbose: true
 
 data:
   challenge_name: "mabe-2022-mouse-triplets"
   data_dir: "data"
   paths:
-    base_dir: "${hydra:runtime.cwd}"
+    base_dir: ${hydra:runtime.cwd}
     dataset_dir: "${data.paths.base_dir}/datasets"
-    submission_dir: "${data.paths.base_dir}/submissions"
-    visualizations_dir: "${data.paths.base_dir}/visualizations"
+    output_dir: "${data.paths.base_dir}/outputs/${general.timestamp}"
+    submission_dir: "${data.paths.output_dir}/submissions"
+    visualizations_dir: "${data.paths.output_dir}/visualizations"
 
 visualization:
   mouse_colors:
