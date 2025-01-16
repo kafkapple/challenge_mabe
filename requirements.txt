@@ -1,0 +1,6 @@
+hydra-core
+numpy
+matplotlib
+scikit-learn
+tqdm
+pillow 
