@@ -1,7 +1,7 @@
 # MABe 2022 Mouse Triplets
 
 https://www.aicrowd.com/challenges/multi-agent-behavior-challenge-2022/problems/mabe-2022-mouse-triplets/leaderboards
-
+https://www.youtube.com/watch?v=rPclAkXtTEY
 
 - Dataset
 %aicrowd ds dl -c {aicrowd_challenge_name} -o data # Download all files
